@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-02-04T06:31:55.635Z",
+  "target": "https://www.ignitioncasino.eu/",
+  "analysis": {
+    "url": "https://www.ignitioncasino.eu/",
+    "title": "Page not found",
+    "forms": [],
+    "inputs": [],
+    "buttons": [],
+    "links": [],
+    "apis": [],
+    "cookies": [
+      ""
+    ],
+    "localStorage": [],
+    "subdomains": [],
+    "externalOrigins": [
+      "portal.azure.com",
+      "azure.microsoft.com"
+    ]
+  },
+  "loginForm": {
+    "loginFields": [],
+    "authEndpoints": [],
+    "validationRules": []
+  },
+  "authPages": {},
+  "recommendations": {
+    "phishing_domain": "ignitioncasino.cc",
+    "target_domain": "www.ignitioncasino.eu",
+    "subdomains": [],
+    "tracking_paths": [
+      "/api/login",
+      "/api/auth",
+      "/login",
+      "/signin",
+      "/api/session"
+    ],
+    "cookie_patterns": [
+      ""
+    ],
+    "important_fields": [
+      "email",
+      "username",
+      "password",
+      "token",
+      "session"
+    ]
+  }
+}
