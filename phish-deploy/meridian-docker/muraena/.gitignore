@@ -1,0 +1,10 @@
+*.pem
+*.log
+*.json
+.DS_Store
+muraena
+build/
+static/
+vendor/
+/docs/_site/
+/docs/.jekyll-metadata

@@ -1,0 +1,57 @@
+# Environment files with secrets
+.env
+
+# Generated configuration files
+config/generated/*.toml
+config/generated/*.json
+
+# SSL certificates
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+ssl/sslkeylog.log
+
+# Logs
+logs/*.log
+*.log
+
+# Docker volumes data
+data/
+sessions/
+screenshots/
+dumps/
+captured/
+
+# Backup files
+*.bak
+*.backup
+backup_*.tar.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node modules (if any)
+node_modules/
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+muraena-linux
+muraena-windows
+muraena-darwin
+
+# Test files
+*.test
+coverage.txt

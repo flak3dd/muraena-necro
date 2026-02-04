@@ -1,0 +1,37 @@
+{
+  "name": "test-victim@example.com",
+  "task": {
+    "type": "ignitioncasino",
+    "name": ["GetAccountInfo"],
+    "params": {}
+  },
+  "cookie": [
+    {
+      "name": "session_token",
+      "value": "REPLACE_WITH_HARVESTED_SESSION_TOKEN",
+      "domain": ".ignitioncasino.ooo",
+      "path": "/",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "user_id",
+      "value": "REPLACE_WITH_USER_ID",
+      "domain": ".ignitioncasino.ooo",
+      "path": "/",
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "auth_token",
+      "value": "REPLACE_WITH_AUTH_TOKEN",
+      "domain": "www.ignitioncasino.ooo",
+      "path": "/",
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ]
+}

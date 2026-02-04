@@ -1,0 +1,37 @@
+BUILD     ?= build
+TARGET    ?= muraena
+PACKAGES  ?= core log session module module/crawler module/necrobrowser module/statichttp module/tracking module/watchdog module/telegram
+GO        ?= go
+
+all: build
+
+# This will be triggered before any command, or when just calling $ make
+# mkdir $(BUILD)
+pre:
+    # GO111MODULE is required only when inside GOPATH
+	env GO111MODULE=on go get -d ./
+
+build: pre
+	$(GO) build -o $(BUILD)/$(TARGET) .
+
+build_with_race_detector: pre
+	$(GO) build -race -o $(BUILD)/$(TARGET) .
+
+buildall: pre
+	env GO111MODULE=on GOOS=darwin GOARCH=amd64 go build -o $(BUILD)/macos/$(TARGET) .
+	env GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o $(BUILD)/linux/$(TARGET) .
+	env GO111MODULE=on GOOS=windows GOARCH=amd64 go build -o  $(BUILD)/windows/$(TARGET).exe .
+
+update: fmt
+	go get -u
+	go mod tidy
+	go vet ./...
+	@git commit go.mod go.sum -S -m "Bump dependencies :chart_with_upwards_trend:"
+
+lint: fmt
+	@git add . && git commit -a -S -m "Code linting :star2:"
+
+fmt:
+	gofmt -s -w $(PACKAGES)
+
+.PHONY: all build build_with_race_detector lint fmt

