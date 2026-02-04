@@ -19,8 +19,17 @@ async function getClient() {
         isConnecting = true;
 
         try {
-            client = redis.createClient({
+            // Read Redis configuration from environment variables
+            const redisHost = process.env.REDIS_HOST || 'redis';
+            const redisPort = parseInt(process.env.REDIS_PORT || '6379');
+            const redisPassword = process.env.REDIS_PASSWORD || '';
+
+            console.log(c.cyan(`[Redis] Connecting to ${redisHost}:${redisPort}...`));
+
+            const clientConfig = {
                 socket: {
+                    host: redisHost,
+                    port: redisPort,
                     reconnectStrategy: (retries) => {
                         if (retries > 10) {
                             console.error(c.red('[Redis] Max reconnection attempts reached'));
@@ -31,7 +40,14 @@ async function getClient() {
                         return delay;
                     }
                 }
-            });
+            };
+
+            // Add password if provided
+            if (redisPassword) {
+                clientConfig.password = redisPassword;
+            }
+
+            client = redis.createClient(clientConfig);
 
             // Error handler - prevents crashes on Redis errors
             client.on("error", function (error) {
@@ -56,6 +72,7 @@ async function getClient() {
 
             await client.connect();
             isConnecting = false;
+            console.log(c.green(`[Redis] Successfully connected to ${redisHost}:${redisPort}`));
         } catch (error) {
             isConnecting = false;
             console.error(c.red('[Redis] Failed to connect:'), error.message);
@@ -71,7 +88,9 @@ exports.CheckRedis = async function () {
         await checkRedis.ping();
         console.log("Redis connection successful");
     } catch (error) {
-        console.error("error: cannot connect to Redis at tcp://127.0.0.1:6379\nexiting now...");
+        const redisHost = process.env.REDIS_HOST || 'redis';
+        const redisPort = process.env.REDIS_PORT || '6379';
+        console.error(`error: cannot connect to Redis at tcp://${redisHost}:${redisPort}\nexiting now...`);
         process.exit(1);
     }
 }

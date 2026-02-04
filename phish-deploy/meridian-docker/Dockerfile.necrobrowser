@@ -44,14 +44,14 @@ RUN groupadd -r necro && useradd -r -g necro -G audio,video necro \
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY necrobrowser/package*.json ./
 
 # Install dependencies
 RUN npm install --production && \
     npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth redis express
 
 # Copy application files
-COPY necrobrowser/ ./
+COPY necrobrowser/ ./ 
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/sessions /app/screenshots /app/profiles && \

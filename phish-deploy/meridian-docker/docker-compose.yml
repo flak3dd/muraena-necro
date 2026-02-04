@@ -32,9 +32,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./config/muraena_config.toml:/app/config/config.toml:ro
+      - ./config/generated/muraena_config.toml:/app/config/config.toml:ro
       - ./phishlets:/app/phishlets:ro
-      - ./ssl:/app/ssl:ro
+      - ./ssl:/app/ssl:rw
+      - ./config/necro_profile.json:/app/config/necro_profile.json:ro
       - muraena-logs:/app/logs
       - muraena-sessions:/app/sessions
       - muraena-data:/app/data
@@ -67,7 +68,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./config/necrobrowser_config.json:/app/config.json:ro
+      - ./config/generated/necrobrowser_config.json:/app/config.json:ro
       - necro-logs:/app/logs
       - necro-sessions:/app/sessions
       - necro-screenshots:/app/screenshots
